@@ -252,7 +252,7 @@ module.exports = {
           },
           {
               test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-              loader: 'url-loader?limit=10000&mimetype=application/fontwoff'
+              loader: 'url-loader?limit=10000&mimetype=application/fontwoff&name=static/fonts/[name].[ext]?[hash]'
           },
           {
               test: /\.module\.less$/,
