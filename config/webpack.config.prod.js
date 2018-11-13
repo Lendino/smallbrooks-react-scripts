@@ -116,6 +116,7 @@ module.exports = {
       // Support React Native Web
       // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
       'react-native': 'react-native-web',
+      "../../theme.config$":  path.resolve(paths.appSrc, "assets/theme/theme.config"),
     },
     plugins: [
       // Prevents users from importing files from outside of src/ (or node_modules/).
@@ -262,6 +263,7 @@ module.exports = {
                           options: {
                               importLoaders: 1,
                               minimize: true,
+                              module: true,
                               sourceMap: shouldUseSourceMap,
                               localIdentName: '[name]__[local]__[hash:base64:5]'
                           }
@@ -273,11 +275,19 @@ module.exports = {
               })
           },
           {
-              test: /\.less$/,
-              use: extractLess.extract({
-                  use: ['css-loader', 'resolve-url-loader', 'less-loader'],
-                  fallback: 'style-loader'
-              })
+            test: /\.less$/,
+            use: extractLess.extract({
+                use: [
+                  {
+                    loader: require.resolve('css-loader'),
+                    options: {
+                      importLoaders: 1,
+                      minimize: true,
+                      sourceMap: shouldUseSourceMap,
+                    },
+                  }, 'resolve-url-loader', 'less-loader'],
+                fallback: 'style-loader'
+            })
           },
           // "file" loader makes sure those assets get served by WebpackDevServer.
           // When you `import` an asset, you get its (virtual) filename.
