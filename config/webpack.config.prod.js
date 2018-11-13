@@ -248,7 +248,7 @@ module.exports = {
           },
           {
             test: /\.ttf$|\.eot$|\.svg$/,
-            use: 'file-loader?name=[name].[ext]?[hash]'
+            use: 'file-loader?name=static/fonts/[name].[ext]?[hash]'
           },
           {
               test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
