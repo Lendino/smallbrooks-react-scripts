@@ -37,7 +37,7 @@ const publicUrl = publicPath.slice(0, -1);
 const env = getClientEnvironment(publicUrl);
 
 const extractLess = new ExtractTextPlugin({
-  filename: "[name].[contenthash].css",
+  filename: "static/css/[name]-theme.[contenthash:8].css",
   disable: false
 });
 

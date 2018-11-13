@@ -32,7 +32,7 @@ const publicUrl = '';
 const env = getClientEnvironment(publicUrl);
 
 const extractLess = new ExtractTextPlugin({
-  filename: "[name].[contenthash].css",
+  filename: "static/css/[name].[contenthash:8].css",
   disable: true
 });
 
