@@ -21,7 +21,6 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const safePostCssParser = require('postcss-safe-parser');
 const ManifestPlugin = require('webpack-manifest-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
 const WorkboxWebpackPlugin = require('workbox-webpack-plugin');
 const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
@@ -68,11 +67,6 @@ module.exports = function(webpackEnv) {
   // Some apps do not use client-side routing with pushState.
   // For these, "homepage" can be set to "." to enable relative asset paths.
   const shouldUseRelativeAssetPaths = publicPath === './';
-
-  const extractLess = new ExtractTextPlugin({
-    filename: "static/css/[name]-theme.[contenthash:8].css",
-    disable: isEnvDevelopment
-  });
 
   // `publicUrl` is just like `publicPath`, but we will provide it to our app
   // as %PUBLIC_URL% in `index.html` and `process.env.PUBLIC_URL` in JavaScript.
@@ -504,45 +498,50 @@ module.exports = function(webpackEnv) {
             },
             {
               test: lessRegex,
-              use: extractLess.extract({
-                  use: [
-                    {
-                      loader: require.resolve('css-loader'),
-                      options: {
-                        importLoaders: 1,
-                        minimize: true,
-                        sourceMap: shouldUseSourceMap,
-                      },
-                    }, 'resolve-url-loader', 'less-loader'
-                  ],
-                  fallback: 'style-loader'
-              })
+              use: getStyleLoaders(
+                {
+                  importLoaders: 2,
+                  sourceMap: isEnvProduction && shouldUseSourceMap,
+                },
+                'less-loader'
+              ),
             },
             {
               test: lessModuleRegex,
-              use: extractLess.extract({
-                  use: [
-                      {
-                          loader: 'css-loader',
-                          options: {
-                              importLoaders: 1,
-                              minimize: true,
-                              module: true,
-                              sourceMap: shouldUseSourceMap,
-                              localIdentName: '[name]__[local]__[hash:base64:5]'
-                          }
-                      }, 'resolve-url-loader', 'less-loader'
-                  ],
-                  fallback: 'style-loader'
-              })
+              use: getStyleLoaders(
+                {
+                  importLoaders: 2,
+                  sourceMap: isEnvProduction && shouldUseSourceMap,
+                  modules: true,
+                  getLocalIdent: getCSSModuleLocalIdent,
+                },
+                'less-loader'
+              ),
             },
             {
               test: /\.ttf$|\.eot$|\.svg$/,
-              use: 'file-loader?name=static/fonts/[name].[ext]?[hash]'
+              use: [
+                {
+                  loader: require.resolve('file-loader'),
+                  options: {
+                    name: 'name=static/fonts/[name].[ext]?[hash]',
+                  },
+                },
+              ],
             },
             {
-                test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-                loader: 'url-loader?limit=10000&mimetype=application/fontwoff&name=static/fonts/[name].[ext]?[hash]'
+              test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+              use: [
+                {
+                  loader: require.resolve('url-loader'),
+                  options: {
+                    limit: 10000,
+                    mimetype: 'application/fontwoff',
+                    name: 'static/fonts/[name].[ext]?[hash]',
+                  }
+
+                }
+              ],
             },
             // "file" loader makes sure those assets get served by WebpackDevServer.
             // When you `import` an asset, you get its (virtual) filename.
@@ -685,7 +684,6 @@ module.exports = function(webpackEnv) {
           // The formatter is invoked directly in WebpackDevServerUtils during development
           formatter: isEnvProduction ? typescriptFormatter : undefined,
         }),
-        extractLess,
     ].filter(Boolean),
     // Some libraries import Node modules but don't use them in the browser.
     // Tell Webpack to provide empty mocks for them so importing them works.
